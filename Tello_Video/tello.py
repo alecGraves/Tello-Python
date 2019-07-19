@@ -8,7 +8,7 @@ class Tello:
     """Wrapper class to interact with the Tello drone."""
 
     def __init__(self, local_ip, local_port, imperial=False, command_timeout=.3, tello_ip='192.168.10.1',
-                 tello_port=8889):
+                 tello_port=8889, interface_str=None):
         """
         Binds to the local IP/port and puts the Tello into command mode.
 
@@ -19,6 +19,7 @@ class Tello:
         :param command_timeout (int|float): Number of seconds to wait for a response to a command.
         :param tello_ip (str): Tello IP.
         :param tello_port (int): Tello port.
+        :param interface_str (str): string for specific interface name
         """
 
         self.abort_flag = False
@@ -31,6 +32,9 @@ class Tello:
         self.last_frame = None
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for sending cmd
         self.socket_video = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # socket for receiving video stream
+        if interface_str is not None:
+            self.socket.setsockopt(socket.SOL_SOCKET, 25, str(interface_str + '\0').encode('utf-8'))
+            self.socket_video.setsockopt(socket.SOL_SOCKET, 25, str(interface_str + '\0').encode('utf-8'))
         self.tello_address = (tello_ip, tello_port)
         self.local_video_port = 11111  # port for receiving video stream
         self.last_height = 0
